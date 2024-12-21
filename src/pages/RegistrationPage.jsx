@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../utils/axios';
+import {  toast } from 'react-toastify';
 
 const RegistrationPage = () => {
   const [formData, setFormData] = useState({
@@ -18,21 +19,35 @@ const RegistrationPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
+  const formatToDbDateTime = (date) => {
+    const test =new Date(date)
+    return test.toISOString()
+
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log("Value", value);
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
+
   const handleRegister = (e) => {
     e.preventDefault();
+const formattedData = {
+      ...formData,
+      dob: formatToDbDateTime(formData.dob), // Format DOB to required format
+    };
+  
 
     axiosClient
-      .post("/users/register", formData)
+      .post("/users/register", formattedData)
       .then((response) => {
-        alert("Registration successful! Please log in.");
+        console.log("base response",response)
+        toast("User register succesfully")
         navigate("/login");
       })
       .catch((err) => {
@@ -76,6 +91,7 @@ const RegistrationPage = () => {
           onChange={handleChange}
           className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
         />
+
         <input
           type="date"
           name="dob"
@@ -114,13 +130,14 @@ const RegistrationPage = () => {
           <option value="ARTIST">Arist</option>
         </select>
         <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
-        />
+        type="password" // Toggle the input type
+        name="password"
+        placeholder="Password"
+        value={formData.password}
+        onChange={handleChange}
+        className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
+      />
+      
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
