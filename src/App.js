@@ -1,34 +1,58 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import RegistrationPage from "./pages/RegistrationPage";
-import DashboardPage from "./pages/DashboardPage";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import {  AuthProvider } from './context/AuthContext';
+import Dashboard from './pages/DashboardPage';
+import Users from './pages/Users';
+import BaseLayout from './layout/BaseLayout';
+import { ToastContainer } from 'react-toastify';
+import LoginPage from './pages/LoginPage';
+import RegistrationPage from './pages/RegistrationPage';
 
-const App = () => {
-  const PrivateRoute = ({ children }) => {
-    const { isLoggedIn } = useAuth();
-    return isLoggedIn ? children : <Navigate to="/login" />;
-  };
 
+
+function App() {
   return (
     <AuthProvider>
+              <ToastContainer />
+
       <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route
-            path="/dashboard/*"
-            element={
-              <PrivateRoute>
-                <DashboardPage />
-              </PrivateRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+        <div className="min-h-screen bg-gray-100">
+          <Routes>
+            <Route path='/login' element={<LoginPage />} />
+            <Route path="/register" element={<RegistrationPage />} />
+           
+           <Route element={<PrivateRoute />}>
+            <Route
+              path="/"
+              element={
+
+                  <Dashboard />
+
+              }
+            />
+            
+            <Route
+              path="/users"
+              element={
+
+                  <Users />
+
+              }
+            />
+           </Route>
+            
+          </Routes>
+        </div>
       </Router>
     </AuthProvider>
   );
+}
+
+const PrivateRoute = ({ children }) => {
+  const user = localStorage.getItem('user');
+  
+  return user ?   <BaseLayout /> : <Navigate to="/login" />;
 };
-export default App; 
+
+export default App;
+

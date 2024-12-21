@@ -1,36 +1,41 @@
-import React from "react";
-import { useAuth } from "../context/AuthContext";
-import { Routes, Route, Navigate, Link } from "react-router-dom";
-import UserList from "../components/UserList";
-import ArtistList from "../components/ArtistList";
+import React, { useState } from 'react';
+import { Route, Routes, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
+// import Users from './Users';
+// import Artists from './Artists';
+// import Songs from './Songs';
 
-const DashboardPage = () => {
-  const { logout } = useAuth();
+const Dashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('users');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
-    <div className="p-4">
-      <header className="flex justify-between items-center bg-blue-500 text-white p-4">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-        <button
-          onClick={logout}
-          className="bg-white text-blue-500 px-4 py-2 rounded hover:bg-gray-200"
-        >
-          Logout
-        </button>
-      </header>
-      <nav className="flex space-x-4 p-4 bg-gray-200">
-        <Link to="/dashboard/users" className="text-blue-500">Users</Link>
-        <Link to="/dashboard/artists" className="text-blue-500">Artists</Link>
-      </nav>
-      <main className="p-4">
-        <Routes>
-          <Route path="users" element={<UserList />} />
-          <Route path="artists" element={<ArtistList />} />
-          <Route path="*" element={<Navigate to="users" />} />
-        </Routes>
-      </main>
+    <div className="min-h-screen bg-gray-100">
+      
+
+      {/* <div className="py-10">
+        <main>
+          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <Routes>
+              {user?.role === 'super_admin' && (
+                <Route path="users" element={<Users />} />
+              )}
+              <Route path="artists" element={<Artists />} />
+              <Route path="artists/:artistId/songs" element={<Songs />} />
+            </Routes>
+          </div>
+        </main>
+      </div> */}
     </div>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;
+
