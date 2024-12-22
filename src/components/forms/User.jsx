@@ -19,10 +19,10 @@ export default function UserForm({user, open, setOpen}) {
 
       const onSubmit = data => {
 
-            axiosClient.put("/users", data )
+            axiosClient.post("/user", data )
             .then(resp => {
                 console.log(resp)
-                toast("User updated successfully");
+                toast("User Added successfully");
                 setOpen(false)
 
             })
@@ -112,9 +112,9 @@ export default function UserForm({user, open, setOpen}) {
               <div className="mt-2">
                <select className='border-b-2 p-1'  {...register("role")} >
                 <option value={""} >Select</option>
-                <option value={"super_admin"}>Super Admin</option>
-                <option value={"artist_manager"}>Artist Manager</option>
-                <option value={"artist"}>Artist</option>
+                <option value={"SUPER_ADMIN"}>Super Admin</option>
+                <option value={"ARTIST_MANAGER"}>Artist Manager</option>
+                <option value={"ARTIST"}>Artist</option>
                </select>
               </div>
             </div>

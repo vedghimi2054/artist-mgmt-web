@@ -7,6 +7,8 @@ import BaseLayout from './layout/BaseLayout';
 import { ToastContainer } from 'react-toastify';
 import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
+import Artists from './pages/Artists';
+import Music from './pages/Music';
 
 
 
@@ -39,7 +41,24 @@ function App() {
 
               }
             />
+            <Route
+              path="/artists"
+              element={
+
+                  <Artists />
+
+              }
+            />
+             <Route
+              path="/music"
+              element={
+
+                  <Music />
+
+              }
+            />
            </Route>
+           
             
           </Routes>
         </div>
