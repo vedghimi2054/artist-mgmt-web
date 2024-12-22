@@ -44,7 +44,7 @@ const formattedData = {
   
 
     axiosClient
-      .post("/users/register", formattedData)
+      .post("/user/register", formattedData)
       .then((response) => {
         console.log("base response",response)
         toast("User register succesfully")
