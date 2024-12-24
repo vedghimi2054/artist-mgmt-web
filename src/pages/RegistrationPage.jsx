@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../utils/axios';
 import {  toast } from 'react-toastify';
+import { formatToDbDateTime } from "../utils/dataTime";
 
 const RegistrationPage = () => {
   const [formData, setFormData] = useState({
@@ -18,12 +19,6 @@ const RegistrationPage = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-
-  const formatToDbDateTime = (date) => {
-    const test =new Date(date)
-    return test.toISOString()
-
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

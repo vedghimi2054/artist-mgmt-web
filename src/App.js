@@ -50,7 +50,7 @@ function App() {
               }
             />
              <Route
-              path="/music"
+              path="/artists/:artistId/music"
               element={
 
                   <Music />

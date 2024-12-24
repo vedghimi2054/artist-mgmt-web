@@ -5,17 +5,23 @@ import { useForm } from "react-hook-form";
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import axiosClient from '../../utils/axios';
 import {  toast } from 'react-toastify';
+import { useState } from "react";
 
 
 export default function UserForm({user, open, setOpen}) {
-    const { register, handleSubmit } = useForm({
-        defaultValues: {
+
+      const [errorMessage, setErrorMessage] = useState("")
+
+        const { register, handleSubmit, getValues } = useForm({
+        values: {
             firstName: user?.firstName || "",
             lastName: user?.lastName || "",
             email: user?.email || "",
             role: user?.role || "",
           }
     });
+ 
+    console.log(getValues())
 
       const onSubmit = data => {
 
@@ -25,11 +31,14 @@ export default function UserForm({user, open, setOpen}) {
                 toast("User Added successfully");
                 setOpen(false)
 
+            }).catch(err => {
+              // set error message here
+              setErrorMessage(err?.response?.data?.message)
             })
             
  
     
-        console.log(data)};
+      };
 
     
   return (
@@ -49,9 +58,11 @@ export default function UserForm({user, open, setOpen}) {
             <form  onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">User</h2>
-         
-
+          <h2 className="text-base/7 font-semibold text-gray-900">Edit User</h2>
+         {
+          errorMessage && 
+          <div > {errorMessage} </div>
+         }
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-4">
               <label htmlFor="firstName" className="block text-sm/6 font-medium text-gray-900">

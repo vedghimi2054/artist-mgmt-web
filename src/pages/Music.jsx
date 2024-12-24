@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axiosClient from "../utils/axios";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
-const Music = ({ artistId }) => {
+const Music = () => {
+  let {artistId} = useParams()
   const [modalOpen, setModalOpen] = useState(false);
   const [currentMusic, setCurrentMusic] = useState(null);
   const [musicList, setMusicList] = useState([]);
+
   const [newMusic, setNewMusic] = useState({
     title: "",
     albumName: "",

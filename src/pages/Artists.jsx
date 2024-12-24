@@ -1,71 +1,60 @@
 import React, { useState, useEffect } from "react";
-import axiosClient from "../utils/axios";
+import axiosClient, { baseUrl, getAuthToken } from "../utils/axios";
 import { toast } from "react-toastify";
 import { CSVLink } from "react-csv"; // Import CSVLink for export
 import { FaFileImport, FaFileExport } from "react-icons/fa"; // Import icons
+import ArtistForm from "../components/forms/Artist";
+import { PlusIcon } from "@heroicons/react/16/solid";
+import Pagination from "../components/Pagination";
+import { useSearchParams } from "react-router-dom";
+import { formatToDbDateTime } from "../utils/dataTime";
+import axios from "axios";
 
 const Artists = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentArtist, setCurrentArtist] = useState(null);
   const [artists, setArtists] = useState([]);
-  const [newArtist, setNewArtist] = useState({
-    name: "",
-    dob: "",
-    gender: "",
-    address: "",
-    firstReleaseYear: "",
-    noOfAlbumsReleased: "",
-  });
+  const [searchParams] = useSearchParams();
+
   const [editingArtist, setEditingArtist] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [csvFile, setCsvFile] = useState(null); // State for CSV file
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    pageSize: 10,
+  });
+
+  const currentPage = searchParams.get("page") || 1
 
   useEffect(() => {
-    const fetchArtists = async () => {
-      try {
-        const response = await axiosClient.get("/artists");
-        setArtists(response.data.dataResponse || []);
-      } catch (err) {
-        setErrorMessage(err?.response?.data?.message || "Error fetching artists");
-      }
-    };
-
     fetchArtists();
-  }, []);
+  }, [modalOpen, currentPage]);
 
-  const handleCreateArtist = () => {
-    setModalOpen(true);
-    const id = Math.random().toString(36).substr(2, 9);
-    setArtists([...artists, { ...newArtist, id }]);
-    setNewArtist({
-      name: "",
-      dob: "",
-      gender: "",
-      address: "",
-      firstReleaseYear: "",
-      noOfAlbumsReleased: "",
-    });
-    toast.success("Artist created successfully");
-  };
+  const fetchArtists = async () => {
+    try {
+      const response = await axiosClient.get(`/artists`, {
+        params: {
+          page: currentPage,
+          pageSize: pagination.pageSize,
+        },
+      });
 
-  const handleUpdateArtist = async () => {
-    if (editingArtist) {
-      try {
-        const response = await axiosClient.put(`/artists/${editingArtist.id}`, editingArtist);
-        setArtists(
-          artists.map((artist) =>
-            artist.id === response.data.dataResponse.id ? response.data.dataResponse : artist
-          )
-        );
-        setEditingArtist(null);
-        setModalOpen(false);
-        toast.success("Artist updated successfully");
-      } catch (err) {
-        setErrorMessage(err?.response?.data?.message || "Error updating artist");
-        toast.error(err?.response?.data?.message || "Error updating artist");
-      }
+      setArtists(response.data.dataResponse || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: response.data.meta.totalPages,
+      }));
+    } catch (err) {
+      setErrorMessage(err?.response?.data?.message || "Error fetching artists");
     }
   };
+
+  const handleUpdateArtist =  (artist) => {
+    setEditingArtist(artist)
+    setModalOpen(true)
+  };
+
+  const handleCreateArtist = () => {
+    setModalOpen(true)
+  }
 
   const handleDeleteArtist = async (id) => {
     try {
@@ -79,43 +68,67 @@ const Artists = () => {
   };
 
   // Handle CSV import (reading file and calling an API)
-  const handleCsvImport = async () => {
-    if (csvFile) {
-      try {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const fileContent = reader.result;
-          const parsedData = parseCsv(fileContent); // Use a library to parse CSV data
-          await axiosClient.post("/artists/bulk", parsedData); // Assuming your API supports bulk import
+  const handleCsvImport = async (e) => {
+  
+    try {
+      const formData = new FormData();
+      formData.append("file", e.target.files[0]);
+        try {
+          await axios({method: "post", url: baseUrl + "/artists/import",data: formData, headers: { "Content-Type": "multipart/form-data",  'Authorization':'Bearer '+ getAuthToken() },} ); // Bulk API call
           toast.success("Artists imported successfully");
-        };
-        reader.readAsText(csvFile);
-      } catch (err) {
-        toast.error("Error importing artists");
-      }
+          window.location.reload()
+        } catch (err) {
+          console.error("Error posting data:", err);
+          toast.error("Error importing artists");
+        }
+
+  
+    } catch (err) {
+      console.error("Error reading file:", err);
+      toast.error("Error importing artists");
+    }
+  };
+  
+  // Parse CSV file into an array of objects
+  const parseCsv = (data) => {
+    const lines = data.split("\n").filter((line) => line.trim() !== ""); // Split and filter empty lines
+    const headers = lines[0].split(",").map((header) => header.trim()); // Extract headers
+    const rows = lines.slice(1); // Exclude headers
+  
+    const formattedRows = rows.map((line) => {
+      const values = line.split(",").map((value) => value.trim());
+      const rowObject = headers.reduce((acc, header, index) => {
+        acc[header] = header === "dob" ? formatToDbDateTime(values[index]) : values[index]; // Format dob
+        return acc;
+      }, {});
+  
+      return rowObject;
+    });
+  
+    return formattedRows;
+  };
+  
+  // Helper function to format date to DB-friendly format
+  const formatToDbDateTime = (dob) => {
+    const date = new Date(dob);
+    return date.toISOString(); // Convert to ISO 8601 format
+  };
+  
+
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= pagination.totalPages) {
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: page,
+      }));
     }
   };
 
-  // Parse CSV file (assuming CSV structure matches the fields)
-  const parseCsv = (data) => {
-    const lines = data.split("\n");
-    const result = lines.map((line) => {
-      const [name, dob, gender, address, firstReleaseYear, noOfAlbumsReleased] = line.split(",");
-      return {
-        name,
-        dob,
-        gender,
-        address,
-        firstReleaseYear,
-        noOfAlbumsReleased,
-      };
-    });
-    return result;
-  };
-
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div className="flex flex-col gap-2 py-4 bg-white shadow overflow-hidden sm:rounded-lg">
       {/* Artist Form Modal */}
+      
+      <ArtistForm artist={editingArtist} open={modalOpen} setOpen={setModalOpen}  />
       <div className={modalOpen ? "block" : "hidden"}>
         {/* Modal content here */}
         <div>
@@ -123,11 +136,20 @@ const Artists = () => {
         </div>
       </div>
 
+        <button
+              className="absolute bottom-2 right-2 h-11 w-11 rounded-full inline-flex items-center p-2 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+            onClick={handleCreateArtist}
+            >
+              <PlusIcon /> 
+            </button>
+     
+
       <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
         <h3 className="text-lg leading-6 font-medium text-gray-900">Artists</h3>
 
         {/* CSV Import and Export Icons */}
         <div className="flex space-x-4">
+         
           <label htmlFor="csv-import" className="cursor-pointer" title="CSV Import">
             <FaFileImport size={20} className="text-green-500 hover:text-green-700" />
             <input
@@ -135,7 +157,7 @@ const Artists = () => {
               id="csv-import"
               accept=".csv"
               className="hidden"
-              onChange={(e) => setCsvFile(e.target.files[0])}
+              onChange={(e) => handleCsvImport(e)}
             />
           </label>
 
@@ -144,7 +166,6 @@ const Artists = () => {
             filename="artists.csv"
             className="text-blue-500 hover:text-blue-700"
             title="CSV Export"
-
           >
             <FaFileExport size={20} />
           </CSVLink>
@@ -168,13 +189,13 @@ const Artists = () => {
             {artists.length > 0 ? (
               artists.map((artist) => (
                 <tr key={artist.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{artist.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{artist.dob.split("T")[0]}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{artist.gender}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{artist.noOfAlbumsReleased}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.name}</td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.dob.split("T")[0]}</td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.gender}</td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.noOfAlbumsReleased}</td>
+                  <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => setEditingArtist(artist)}
+                      onClick={() => handleUpdateArtist(artist)}
                       className="text-indigo-600 hover:text-indigo-900 mr-2"
                     >
                       Edit
@@ -199,97 +220,8 @@ const Artists = () => {
         </table>
       </div>
 
-      <div className="px-4 py-5 sm:px-6">
-        <h4 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          {editingArtist ? "Edit Artist" : "Create New Artist"}
-        </h4>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Name"
-            value={editingArtist ? editingArtist.name : newArtist.name}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, name: e.target.value })
-                : setNewArtist({ ...newArtist, name: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-          <input
-            type="date"
-            value={editingArtist ? editingArtist.dob : newArtist.dob}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, dob: e.target.value })
-                : setNewArtist({ ...newArtist, dob: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-          <select
-            value={editingArtist ? editingArtist.gender : newArtist.gender}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, gender: e.target.value })
-                : setNewArtist({ ...newArtist, gender: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-            <option value="OTHER">Other</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Address"
-            value={editingArtist ? editingArtist.address : newArtist.address}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, address: e.target.value })
-                : setNewArtist({ ...newArtist, address: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-          <input
-            type="number"
-            placeholder="First Release Year"
-            value={editingArtist ? editingArtist.firstReleaseYear : newArtist.firstReleaseYear}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, firstReleaseYear: e.target.value })
-                : setNewArtist({ ...newArtist, firstReleaseYear: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-          <input
-            type="number"
-            placeholder="Albums Released"
-            value={editingArtist ? editingArtist.noOfAlbumsReleased : newArtist.noOfAlbumsReleased}
-            onChange={(e) =>
-              editingArtist
-                ? setEditingArtist({ ...editingArtist, noOfAlbumsReleased: e.target.value })
-                : setNewArtist({ ...newArtist, noOfAlbumsReleased: e.target.value })
-            }
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mt-4">
-          {editingArtist ? (
-            <button
-              onClick={handleUpdateArtist}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Update Artist
-            </button>
-          ) : (
-            <button
-              onClick={handleCreateArtist}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Create Artist
-            </button>
-          )}
-        </div>
-      </div>
+      {/* Pagination Controls */}
+  <Pagination totalPages={pagination.totalPages}/>
     </div>
   );
 };
