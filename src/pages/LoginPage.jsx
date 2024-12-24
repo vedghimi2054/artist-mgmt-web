@@ -2,10 +2,12 @@ import React, { useState } from "react";
 
 import axiosClient from '../utils/axios';
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 
 const LoginPage = () => {
   const { register, handleSubmit } = useForm()
+  const nevigate=useNavigate()
 const [errorMessage, setErrorMessage] = useState("")
 
   const handleLogin = (data) => {
@@ -14,7 +16,7 @@ const [errorMessage, setErrorMessage] = useState("")
           (response) => {
               localStorage.setItem("user", JSON.stringify({token: response.data.dataResponse.token, role: response.data.dataResponse.role}));
               localStorage.setItem("role", response.data.dataResponse.role);
-              window.location.replace("/")             
+              nevigate("/")           
           }
       ).catch(err =>  setErrorMessage(err?.response?.data?.message))
 

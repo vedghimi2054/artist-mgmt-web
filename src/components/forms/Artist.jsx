@@ -22,14 +22,11 @@ export default function ArtistForm({artist, open, setOpen}) {
           }
     });
  
-    console.log(getValues())
-
       const onSubmit = data => {
 
         if (artist){
             axiosClient.put(`/artists/${artist.id}`, {...data, dob: formatToDbDateTime(data.dob)} )
             .then(resp => {
-                console.log(resp)
                 toast("Artist edited successfully");
                 setOpen(false)
 
@@ -40,10 +37,8 @@ export default function ArtistForm({artist, open, setOpen}) {
             return;
         }
 
-        console.log("add data:: ", data)
             axiosClient.post("/artists", {...data, dob: formatToDbDateTime(data.dob)} )
             .then(resp => {
-                console.log(resp)
                 toast("Artist created successfully");
                 setOpen(false)
 

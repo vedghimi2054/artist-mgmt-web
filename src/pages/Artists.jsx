@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axiosClient, { baseUrl, getAuthToken } from "../utils/axios";
 import { toast } from "react-toastify";
-import { CSVLink } from "react-csv"; // Import CSVLink for export
 import { FaFileImport, FaFileExport } from "react-icons/fa"; // Import icons
 import ArtistForm from "../components/forms/Artist";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import Pagination from "../components/Pagination";
-import { useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { formatToDbDateTime } from "../utils/dataTime";
 import axios from "axios";
 
 const Artists = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [artists, setArtists] = useState([]);
-  const [searchParams] = useSearchParams();
-
   const [editingArtist, setEditingArtist] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [pagination, setPagination] = useState({
     totalPages: 1,
     pageSize: 10,
   });
-
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const currentPage = searchParams.get("page") || 1
 
   useEffect(() => {
@@ -89,24 +87,28 @@ const Artists = () => {
     }
   };
   
-  // Parse CSV file into an array of objects
-  const parseCsv = (data) => {
-    const lines = data.split("\n").filter((line) => line.trim() !== ""); // Split and filter empty lines
-    const headers = lines[0].split(",").map((header) => header.trim()); // Extract headers
-    const rows = lines.slice(1); // Exclude headers
+  // Handle CSV export 
+  const handleCsvExport = async () => {
   
-    const formattedRows = rows.map((line) => {
-      const values = line.split(",").map((value) => value.trim());
-      const rowObject = headers.reduce((acc, header, index) => {
-        acc[header] = header === "dob" ? formatToDbDateTime(values[index]) : values[index]; // Format dob
-        return acc;
-      }, {});
-  
-      return rowObject;
-    });
-  
-    return formattedRows;
+    try {
+      const response = await axiosClient.get("/artists/export", {
+        params: {
+          page: currentPage,
+          pageSize: pagination.pageSize,
+      },});
+
+    const url = window.URL.createObjectURL(new Blob([response.data])) 
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', "output.csv")
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    } catch (err) {
+      setErrorMessage(err?.response?.data?.message || "Error fetching users");
+    }
   };
+  
   
   // Helper function to format date to DB-friendly format
   const formatToDbDateTime = (dob) => {
@@ -137,7 +139,7 @@ const Artists = () => {
       </div>
 
         <button
-              className="absolute bottom-2 right-2 h-11 w-11 rounded-full inline-flex items-center p-2 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+              className="absolute bottom-2 right-2 h-11 w-11 rounded-full inline-flex items-center p-2 py-2 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
             onClick={handleCreateArtist}
             >
               <PlusIcon /> 
@@ -158,21 +160,18 @@ const Artists = () => {
               accept=".csv"
               className="hidden"
               onChange={(e) => handleCsvImport(e)}
-            />
+              />
           </label>
 
-          <CSVLink
-            data={artists} // Export the current artist list
-            filename="artists.csv"
-            className="text-blue-500 hover:text-blue-700"
-            title="CSV Export"
-          >
-            <FaFileExport size={20} />
-          </CSVLink>
+       
+            <FaFileExport
+             size={20} 
+             className="text-blue-500 hover:text-blue-700"
+             onClick={handleCsvExport}
+             
+             />
         </div>
       </div>
-
-      {errorMessage && <div className="text-red-500">{errorMessage}</div>}
 
       <div className="border-t border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
@@ -194,6 +193,14 @@ const Artists = () => {
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.gender}</td>
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">{artist.noOfAlbumsReleased}</td>
                   <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                  <Link
+                  to={`/artist/${artist.id}/music`}
+                
+                      className="text-indigo-600 hover:text-indigo-900 mr-2"
+                    >
+                      View music
+
+                    </Link>
                     <button
                       onClick={() => handleUpdateArtist(artist)}
                       className="text-indigo-600 hover:text-indigo-900 mr-2"

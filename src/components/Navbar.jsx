@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('artists');
+  const [activeTab, setActiveTab] = useState('');
 
   const handleLogout = () => {
     logout();
@@ -50,21 +50,6 @@ export default function Navbar() {
                   onClick={() => setActiveTab('artists')}
                 >
                   Artists
-                </Link>
-              )}
-
-              {/* Show Music tab for super_admin, artist_manager, and artist */}
-              {(user?.role === "SUPER_ADMIN" || user?.role === "ARTIST_MANAGER" || user?.role === "ARTIST") && (
-                <Link
-                  to="/music"
-                  className={`${
-                    activeTab === 'music'
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-                  onClick={() => setActiveTab('music')}
-                >
-                  Music
                 </Link>
               )}
             </div>

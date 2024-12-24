@@ -22,7 +22,6 @@ const RegistrationPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log("Value", value);
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -34,14 +33,13 @@ const RegistrationPage = () => {
     e.preventDefault();
 const formattedData = {
       ...formData,
-      dob: formatToDbDateTime(formData.dob), // Format DOB to required format
+      dob: formatToDbDateTime(formData.dob), 
     };
   
 
     axiosClient
       .post("/user/register", formattedData)
       .then((response) => {
-        console.log("base response",response)
         toast("User register succesfully")
         navigate("/login");
       })

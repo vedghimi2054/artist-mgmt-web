@@ -1,16 +1,17 @@
-'use client'
-
 import { useForm } from "react-hook-form";
 
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import axiosClient from '../../utils/axios';
 import {  toast } from 'react-toastify';
 import { useState } from "react";
+import { formatToDbDateTime } from "../../utils/dataTime";
+import { useParams } from "react-router-dom";
 
 
 export default function UserForm({user, open, setOpen}) {
 
       const [errorMessage, setErrorMessage] = useState("")
+      const id= useParams()
 
         const { register, handleSubmit, getValues } = useForm({
         values: {
@@ -18,17 +19,18 @@ export default function UserForm({user, open, setOpen}) {
             lastName: user?.lastName || "",
             email: user?.email || "",
             role: user?.role || "",
+            phone:user?.phone || "",
+            dob:user?.dob || "",
+            gender:user?.gender || "",
+            address:user?.address || ""
           }
     });
  
-    console.log(getValues())
-
       const onSubmit = data => {
 
-            axiosClient.post("/user", data )
+            axiosClient.put(`/user/${id}`, data )
             .then(resp => {
-                console.log(resp)
-                toast("User Added successfully");
+                toast("User Edit successfully");
                 setOpen(false)
 
             }).catch(err => {
@@ -110,6 +112,59 @@ export default function UserForm({user, open, setOpen}) {
                     name="email"
                     type="email"
                     {...register("email")}
+                    className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="sm:col-span-4">
+              <label htmlFor="phone" className="block text-sm/6 font-medium text-gray-900">
+                Phone
+              </label>
+              <div className="mt-2">
+                <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    {...register("phone")}
+                    className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label htmlFor="dob" className="block text-sm/6 font-medium text-gray-900">
+                Date of Birth
+              </label>
+              <div className="mt-2">
+                <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  
+                  <input
+                    id="dob"
+                    name="dob"
+                    type="date"
+                    {...register("dob")}
+                    className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label htmlFor="address" className="block text-sm/6 font-medium text-gray-900">
+                Address
+              </label>
+              <div className="mt-2">
+                <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    {...register("address")}
                     className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                   />
                 </div>

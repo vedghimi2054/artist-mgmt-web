@@ -17,4 +17,16 @@ const axiosClient = axios.create({
   },
 });
 
+axiosClient.interceptors.response.use((response) => {
+ return response;
+}, (error) => {
+  if(error.status === 401) {
+       window.location.replace("/login")
+  }  
+  if (error.response && error.response.data) {
+      return Promise.reject(error.response.data);
+  }
+  return Promise.reject(error.message);
+});
+
 export default axiosClient;
