@@ -6,7 +6,6 @@ import ArtistForm from "../components/forms/Artist";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import Pagination from "../components/Pagination";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { formatToDbDateTime } from "../utils/dataTime";
 import axios from "axios";
 
 const Artists = () => {
@@ -109,23 +108,6 @@ const Artists = () => {
     }
   };
   
-  
-  // Helper function to format date to DB-friendly format
-  const formatToDbDateTime = (dob) => {
-    const date = new Date(dob);
-    return date.toISOString(); // Convert to ISO 8601 format
-  };
-  
-
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= pagination.totalPages) {
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: page,
-      }));
-    }
-  };
-
   return (
     <div className="flex flex-col gap-2 py-4 bg-white shadow overflow-hidden sm:rounded-lg">
       {/* Artist Form Modal */}
@@ -196,20 +178,20 @@ const Artists = () => {
                   <Link
                   to={`/artist/${artist.id}/music`}
                 
-                      className="text-indigo-600 hover:text-indigo-900 mr-2"
-                    >
+                  className="inline-flex items-center px-2 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
+                  >
                       View music
 
                     </Link>
                     <button
                       onClick={() => handleUpdateArtist(artist)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-2"
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteArtist(artist.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 mr-2"
                     >
                       Delete
                     </button>

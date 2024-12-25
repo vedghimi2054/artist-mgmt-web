@@ -11,7 +11,7 @@ export default function MusicForm({ music, open, setOpen }) {
     const {artistId}= useParams()
   
 
-  const { register, handleSubmit, getValues } = useForm({
+  const { register, handleSubmit } = useForm({
     values: {
       artistId,
       title: music?.title || "",
@@ -117,7 +117,7 @@ export default function MusicForm({ music, open, setOpen }) {
                             {...register("genre")}
                           >
                             <option value="">Select</option>
-                            <option value="MALE">Mb</option>
+                            <option value="MB">Mb</option>
                             <option value="COUNTRY">Country</option>
                             <option value="ROCK">Rock</option>
                             <option value="JAZZ">Jazz</option>

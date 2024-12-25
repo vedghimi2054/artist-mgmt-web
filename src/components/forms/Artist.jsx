@@ -11,7 +11,7 @@ import { formatToDbDateTime } from "../../utils/dataTime";
 export default function ArtistForm({artist, open, setOpen}) {
       const [errorMessage, setErrorMessage] = useState("")
 
-        const { register, handleSubmit, getValues } = useForm({
+        const { register, handleSubmit } = useForm({
         values: {
             name: artist?.name || "",
             dob: artist?.dob || "",

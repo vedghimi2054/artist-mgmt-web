@@ -9,11 +9,6 @@ const Dashboard = () => {
   const [dashboard, setDashboard] = useState();
   const [errorMessage, setErrorMessage] = useState();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   useEffect(() => {
     fetchAllDashboardStatistics();
   }, []);

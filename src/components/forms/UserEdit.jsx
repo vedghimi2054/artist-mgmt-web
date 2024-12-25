@@ -4,7 +4,6 @@ import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import axiosClient from '../../utils/axios';
 import {  toast } from 'react-toastify';
 import { useState } from "react";
-import { formatToDbDateTime } from "../../utils/dataTime";
 import { useParams } from "react-router-dom";
 
 
@@ -13,7 +12,7 @@ export default function UserForm({user, open, setOpen}) {
       const [errorMessage, setErrorMessage] = useState("")
       const id= useParams()
 
-        const { register, handleSubmit, getValues } = useForm({
+        const { register, handleSubmit } = useForm({
         values: {
             firstName: user?.firstName || "",
             lastName: user?.lastName || "",

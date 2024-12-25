@@ -64,15 +64,6 @@ const Music = () => {
     }
   };
 
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= pagination.totalPages) {
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: page,
-      }));
-    }
-  };
-
   return (
     <div className="flex flex-col gap-2 py-4 bg-white shadow overflow-hidden sm:rounded-lg">
       <button
