@@ -104,7 +104,7 @@ const Users = () => {
 
       {/* Pagination Controls */}
       <Pagination
-        totalPages={pagination.totalPages}
+        totalPages={pagination?.totalPages}
       />
     </div>
   );

@@ -137,7 +137,7 @@ const Music = () => {
       </div>
 
       {/* Pagination Controls */}
-  <Pagination totalPages={pagination.totalPages}/>
+  <Pagination totalPages={pagination?.totalPages}/>
     </div>
   );
 };

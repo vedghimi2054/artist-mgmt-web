@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../utils/axios';
-import {  toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { formatToDbDateTime } from "../utils/dataTime";
 
 const RegistrationPage = () => {
@@ -18,6 +18,9 @@ const RegistrationPage = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,24 +31,39 @@ const RegistrationPage = () => {
     }));
   };
 
+  const validateForm = () => {
+    const { firstName, email, password, role } = formData;
+    if (!firstName || !email || !password || !role) {
+      setErrorMessage("All fields are required.");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrorMessage("Invalid email format.");
+      return false;
+    }
+    return true;
+  };
 
   const handleRegister = (e) => {
     e.preventDefault();
-const formattedData = {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    const formattedData = {
       ...formData,
-      dob: formatToDbDateTime(formData.dob), 
+      dob: formatToDbDateTime(formData.dob),
     };
-  
 
     axiosClient
       .post("/user/register", formattedData)
-      .then((response) => {
-        toast("User register succesfully")
+      .then(() => {
+        toast.success("User registered successfully");
         navigate("/login");
       })
       .catch((err) => {
-        setErrorMessage(err?.response?.data?.message || "Registration failed. Please try again.");
-      });
+        setErrorMessage(err?.message || "Registration failed. Please try again.");
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -84,7 +102,6 @@ const formattedData = {
           onChange={handleChange}
           className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
         />
-
         <input
           type="date"
           name="dob"
@@ -119,23 +136,32 @@ const formattedData = {
         >
           <option value="">Select Role</option>
           <option value="SUPER_ADMIN">Super Admin</option>
-          <option value="ARTIST_MANAGER">Artist Manger</option>
-          <option value="ARTIST">Arist</option>
+          <option value="ARTIST_MANAGER">Artist Manager</option>
+          <option value="ARTIST">Artist</option>
         </select>
-        <input
-        type="password" // Toggle the input type
-        name="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-        className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
-      />
-      
+        <div className="relative w-full mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2 text-sm text-gray-600"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+          disabled={isLoading}
         >
-          Register
+          {isLoading ? "Registering..." : "Register"}
         </button>
         {errorMessage && <span className="pt-2 text-red-500">{errorMessage}</span>}
         <p className="text-center mt-4">

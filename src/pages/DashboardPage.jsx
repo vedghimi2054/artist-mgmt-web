@@ -27,11 +27,9 @@ const Dashboard = () => {
     <div className="w-full min-h-screen bg-gray-100">
       <div className="flex w-full gap-4 px-4"> 
         <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow">
-          <a href="#">
             <h5 class="mb-2 text-2xl font-bold tracking-tight text-black">
               Total Users
             </h5>
-          </a>
           <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{dashboard?.totalUsers}</p>
           <Link
             to={"/users"}
@@ -42,11 +40,9 @@ const Dashboard = () => {
         </div>
 
         <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow">
-          <a href="#">
             <h5 class="mb-2 text-2xl font-bold tracking-tight text-black">
               Total Artists
             </h5>
-          </a>
           <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{dashboard?.totalArtists}</p>
           <Link
             to={"/artists"}
@@ -57,11 +53,9 @@ const Dashboard = () => {
         </div>
 
         <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow">
-          <a href="#">
             <h5 class="mb-2 text-2xl font-bold tracking-tight text-black">
               Total Songs
             </h5>
-          </a>
           <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{dashboard?.totalSongs}</p>
         </div>
       </div>
