@@ -201,7 +201,7 @@ const Artists = () => {
                     {artist.name}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                    {artist.dob.split("T")[0]}
+                    {artist.dob}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                     {artist.gender}
