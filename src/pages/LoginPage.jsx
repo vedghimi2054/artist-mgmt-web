@@ -13,19 +13,23 @@ const LoginPage = () => {
   const email = watch("email");
   const password = watch("password");
 
-  const handleLogin = (data) => {
-    axiosClient
+  const handleLogin = async (data) => {
+   await axiosClient
       .post("/auth/login", data)
       .then((response) => {
         localStorage.setItem(
           "user",
           JSON.stringify({
+            Id: response.data.dataResponse.id,
             token: response.data.dataResponse.token,
             role: response.data.dataResponse.role,
+            firstName: response.data.dataResponse.firstName,
+            lastName: response.data.dataResponse.lastName,
+
           })
         );
         localStorage.setItem("role", response.data.dataResponse.role);
-        navigate("/");
+        window.location.replace("/");
       })
       .catch((err) => setErrorMessage(err?.response?.data?.message));
   };

@@ -210,6 +210,7 @@ const Artists = () => {
                     {artist.noOfAlbumsReleased}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="w-full flex gap-4 justify-center">
                     <Link
                       to={`/artist/${artist.id}/music`}
                       className="inline-flex items-center px-2 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
@@ -228,6 +229,7 @@ const Artists = () => {
                     >
                       Delete
                     </button>
+                    </div>
                   </td>
                 </tr>
               ))
