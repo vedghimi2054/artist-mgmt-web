@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-
 import axiosClient from "../utils/axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
-
 const LoginPage = () => {
-  const { register, handleSubmit } = useForm();
-  const nevigate = useNavigate();
+  const { register, handleSubmit, watch } = useForm();
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Watch email and password fields
+  const email = watch("email");
+  const password = watch("password");
 
   const handleLogin = (data) => {
     axiosClient
@@ -23,7 +25,7 @@ const LoginPage = () => {
           })
         );
         localStorage.setItem("role", response.data.dataResponse.role);
-        nevigate("/");
+        navigate("/");
       })
       .catch((err) => setErrorMessage(err?.response?.data?.message));
   };
@@ -53,16 +55,15 @@ const LoginPage = () => {
             >
               {showPassword ? "Hide" : "Show"}
             </button>
-          
           </div>
           <button
-            onClick={handleLogin}
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!email || !password} // Disable if email or password is empty
           >
             Login
           </button>
           <span className="pt-2 text-red-500">{errorMessage}</span>
-
           <p className="text-center mt-4">
             New Admin?{" "}
             <a href="/register" className="text-blue-500">

@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import {Link } from "react-router-dom";
 import axiosClient from "../utils/axios";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState();
   const [errorMessage, setErrorMessage] = useState();
 

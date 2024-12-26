@@ -1,209 +1,190 @@
-
 import { useForm } from "react-hook-form";
-
-import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
-import axiosClient from '../../utils/axios';
-import {  toast } from 'react-toastify';
+import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
+import axiosClient from "../../utils/axios";
+import { toast } from "react-toastify";
 import { useState } from "react";
 import { formatToDbDateTime } from "../../utils/dataTime";
 
+export default function ArtistForm({ artist, open, setOpen }) {
+  const [errorMessage, setErrorMessage] = useState("");
 
-export default function ArtistForm({artist, open, setOpen}) {
-      const [errorMessage, setErrorMessage] = useState("")
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    values: {
+      name: artist?.name || "",
+      dob: artist?.dob || "",
+      gender: artist?.gender || "",
+      address: artist?.address || "",
+      firstReleaseYear: artist?.firstReleaseYear || "",
+      noOfAlbumsReleased: artist?.noOfAlbumsReleased || "",
+    },
+  });
 
-        const { register, handleSubmit } = useForm({
-        values: {
-            name: artist?.name || "",
-            dob: artist?.dob || "",
-            gender: artist?.gender || "",
-            address: artist?.address || "",
-            firstReleaseYear: artist?.firstReleaseYear || "",
-            noOfAlbumsReleased: artist?.noOfAlbumsReleased || 0,
-          }
-    });
- 
-      const onSubmit = data => {
+  const handleCancel = () => {
+    reset(); // Reset form and clear validation errors
+    setOpen(false); // Close the modal
+  };
 
-        if (artist){
-            axiosClient.put(`/artists/${artist.id}`, {...data, dob: formatToDbDateTime(data.dob)} )
-            .then(resp => {
-                toast("Artist edited successfully");
-                setOpen(false)
+  const onSubmit = (data) => {
+    if (artist) {
+      axiosClient
+        .put(`/artists/${artist.id}`, {
+          ...data,
+          dob: formatToDbDateTime(data.dob),
+        })
+        .then(() => {
+          toast.success("Artist edited successfully");
+          setOpen(false);
+        })
+        .catch((err) => {
+          setErrorMessage(err?.response?.data?.message || "An error occurred");
+        });
+      return;
+    }
 
-            }).catch(err => {
-              // set error message here
-              setErrorMessage(err?.response?.data?.message)
-            })
-            return;
-        }
+    axiosClient
+      .post("/artists", {
+        ...data,
+        dob: formatToDbDateTime(data.dob),
+      })
+      .then(() => {
+        toast.success("Artist created successfully");
+        setOpen(false);
+      })
+      .catch((err) => {
+        setErrorMessage(err?.response?.data?.message || "An error occurred");
+      });
+  };
 
-            axiosClient.post("/artists", {...data, dob: formatToDbDateTime(data.dob)} )
-            .then(resp => {
-                toast("Artist created successfully");
-                setOpen(false)
-
-            }).catch(err => {
-              // set error message here
-              setErrorMessage(err?.response?.data?.message)
-            })
-            
- 
-    
-      };
-
-    
   return (
-    <Dialog open={open} onClose={setOpen} className="relative z-10">
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-gray-500/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
-      />
+    <Dialog open={open} onClose={() => setOpen(false)} className="relative z-10">
+      <DialogBackdrop className="fixed inset-0 bg-gray-500/75" />
+      <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <DialogPanel className="relative w-full max-w-md bg-white rounded-lg shadow-xl">
+            <div className="px-4 py-6 sm:p-6">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {artist ? "Edit Artist" : "Create Artist"}
+                  </h2>
+                  {errorMessage && (
+                    <div className="mt-2 text-sm text-red-600">{errorMessage}</div>
+                  )}
 
-      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <DialogPanel
-            transition
-            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-lg data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
-          >
-            <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-            <form onSubmit={handleSubmit(onSubmit)}>
-  <div className="space-y-12">
-    <div className="border-b border-gray-900/10 pb-12">
-      <h2 className="text-base/7 font-semibold text-gray-900">
-        {artist ? "Edit Artist" : "Create Artist"}
-      </h2>
-      {errorMessage && <div>{errorMessage}</div>}
-      <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="name"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            Name
-          </label>
-          <div className="mt-2">
-            <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-              <input
-                id="name"
-                name="name"
-                type="text"
-                className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
-                {...register("name")}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="dob"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            Date of Birth
-          </label>
-          <div className="mt-2">
-            <input
-              type="date"
-              name="dob"
-              className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring"
-              {...register("dob")}
-            />
-          </div>
-        </div>
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="gender"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            Gender
-          </label>
-          <div className="mt-2">
-            <select
-              className="border-b-2 p-1"
-              {...register("gender")}
-            >
-              <option value="">Select</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-        </div>
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="address"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            Address
-          </label>
-          <div className="mt-2">
-          <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  {/* Name */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-900 text-left">
+                      Name
+                    </label>
+                    <input
+                      id="name"
+                      {...register("name", { required: "Name is required" })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    />
+                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+                  </div>
 
-            <input
-              id="address"
-              name="address"
-              type="text"
-              className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
-              {...register("address")}
-            />
-</div>
-          </div>
-        </div>
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="firstReleaseYear"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            First Release Year
-          </label>
-          <div className="mt-2">
-          <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  {/* Date of Birth */}
+                  <div>
+                    <label htmlFor="dob" className="block text-sm font-medium text-gray-900 text-left">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      {...register("dob", { required: "Date of Birth is required" })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    />
+                    {errors.dob && <p className="mt-1 text-sm text-red-600">{errors.dob.message}</p>}
+                  </div>
 
-            <input
-              id="firstReleaseYear"
-              name="firstReleaseYear"
-              type="number"
-              className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
-              {...register("firstReleaseYear")}
-            />
-          </div>
-          </div>
-        </div>
-        <div className="sm:col-span-4">
-          <label
-            htmlFor="noOfAlbumsReleased"
-            className="block text-sm/6 font-medium text-gray-900"
-          >
-            No. of Albums Released
-          </label>
-          <div className="mt-2">
-          <div className="flex items-center rounded-md bg-white pl-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                  {/* Gender */}
+                  <div>
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-900 text-left">
+                      Gender
+                    </label>
+                    <select
+                      {...register("gender", { required: "Gender is required" })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    >
+                      <option value="">Select</option>
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                    {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
+                  </div>
 
-            <input
-              id="noOfAlbumsReleased"
-              name="noOfAlbumsReleased"
-              type="number"
-              className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
-              {...register("noOfAlbumsReleased")}
-            />
-          </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-    <input
-      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      type="submit"
-    />
-  </div>
-</form>
+                  {/* Address */}
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-900 text-left">
+                      Address
+                    </label>
+                    <input
+                      {...register("address", { required: "Address is required" })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    />
+                    {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>}
+                  </div>
 
+                  {/* First Release Year */}
+                  <div>
+                    <label htmlFor="firstReleaseYear" className="block text-sm font-medium text-gray-900 text-left">
+                      First Release Year
+                    </label>
+                    <input
+                      type="number"
+                      {...register("firstReleaseYear", { required: "First Release Year is required" })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    />
+                    {errors.firstReleaseYear && (
+                      <p className="mt-1 text-sm text-red-600">{errors.firstReleaseYear.message}</p>
+                    )}
+                  </div>
+
+                  {/* No. of Albums Released */}
+                  <div>
+                    <label htmlFor="noOfAlbumsReleased" className="block text-sm font-medium text-gray-900 text-left">
+                      No. of Albums Released
+                    </label>
+                    <input
+                      type="number"
+                      {...register("noOfAlbumsReleased", {
+                        required: "Number of Albums Released is required",
+                      })}
+                      className="w-full mt-1 border rounded px-3 py-2"
+                    />
+                    {errors.noOfAlbumsReleased && (
+                      <p className="mt-1 text-sm text-red-600">{errors.noOfAlbumsReleased.message}</p>
+                    )}
+                  </div>
+                </div>
+
+               <div className="mt-6 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
             </div>
           </DialogPanel>
         </div>
       </div>
-
     </Dialog>
-  )
+  );
 }
+ 
