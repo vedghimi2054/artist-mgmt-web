@@ -4,10 +4,12 @@ import axiosClient from "../../utils/axios";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { formatToDbDateTime } from "../../utils/dataTime";
 
 export default function UserForm({ user, open, setOpen }) {
   const [errorMessage, setErrorMessage] = useState("");
   const { id } = useParams();
+  const formattedDob = formatToDbDateTime(user?.dob);
 
   const {
     register,
@@ -21,7 +23,7 @@ export default function UserForm({ user, open, setOpen }) {
       email: user?.email || "",
       role: user?.role || "",
       phone: user?.phone || "",
-      dob: user?.dob || "",
+      dob: formattedDob || "",
       gender: user?.gender || "",
       address: user?.address || "",
     },

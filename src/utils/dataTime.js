@@ -1,7 +1,8 @@
+import dayjs from "dayjs";
+
 
 export const formatToDbDateTime = (date) => {
-    const test =new Date(date)
-    return test.toISOString()
-
+  if (!date) return ""; 
+  return dayjs(date).format('YYYY-MM-DD')
   };
 

@@ -7,6 +7,7 @@ import { formatToDbDateTime } from "../../utils/dataTime";
 
 export default function ArtistForm({ artist, open, setOpen }) {
   const [errorMessage, setErrorMessage] = useState("");
+  const formattedDob = formatToDbDateTime(artist?.dob);
 
   const {
     register,
@@ -16,7 +17,7 @@ export default function ArtistForm({ artist, open, setOpen }) {
   } = useForm({
     values: {
       name: artist?.name || "",
-      dob: artist?.dob || "",
+      dob: formattedDob || "",
       gender: artist?.gender || "",
       address: artist?.address || "",
       firstReleaseYear: artist?.firstReleaseYear || "",
@@ -30,6 +31,7 @@ export default function ArtistForm({ artist, open, setOpen }) {
   };
 
   const onSubmit = (data) => {
+    console.log(data, 'data:')
     if (artist) {
       axiosClient
         .put(`/artists/${artist.id}`, {
