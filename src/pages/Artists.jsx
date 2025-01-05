@@ -7,6 +7,7 @@ import { PlusIcon } from "@heroicons/react/16/solid";
 import Pagination from "../components/Pagination";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { formatToDbDateTime } from "../utils/dataTime";
 
 const Artists = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -201,7 +202,7 @@ const Artists = () => {
                     {artist.name}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                    {artist.dob}
+                    {formatToDbDateTime(artist.dob)}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                     {artist.gender}
