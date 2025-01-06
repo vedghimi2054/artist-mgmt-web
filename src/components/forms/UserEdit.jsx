@@ -3,7 +3,6 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import axiosClient from "../../utils/axios";
 import { toast } from "react-toastify";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
 import { formatToDbDateTime } from "../../utils/dataTime";
 
 export default function UserForm({ user, open, setOpen }) {
@@ -32,16 +31,17 @@ export default function UserForm({ user, open, setOpen }) {
     reset(); // Reset form and clear validation errors
     setOpen(false); // Close the modal
   };
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log("id:",user.id)
-    axiosClient
+    await axiosClient
       .put(`/user/${user.id}`, data)
       .then(() => {
         toast("User updated successfully");
         setOpen(false);
       })
       .catch((err) => {
-        setErrorMessage(err?.response?.data?.message);
+        toast.error(err?.message)
+        // setErrorMessage(err?.message);
       });
   };
 
