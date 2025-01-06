@@ -8,7 +8,6 @@ import { formatToDbDateTime } from "../../utils/dataTime";
 
 export default function UserForm({ user, open, setOpen }) {
   const [errorMessage, setErrorMessage] = useState("");
-  const { id } = useParams();
   const formattedDob = formatToDbDateTime(user?.dob);
 
   const {
@@ -34,8 +33,9 @@ export default function UserForm({ user, open, setOpen }) {
     setOpen(false); // Close the modal
   };
   const onSubmit = (data) => {
+    console.log("id:",user.id)
     axiosClient
-      .put(`/user/${id}`, data)
+      .put(`/user/${user.id}`, data)
       .then(() => {
         toast("User updated successfully");
         setOpen(false);
